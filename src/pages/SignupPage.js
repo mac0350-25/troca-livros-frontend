@@ -1,68 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../api/auth';
 
-// --- Componente Principal --- //
-const SignupPage = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const handleSignup = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setErrorMessage('As senhas não coincidem!');
-    } else {
-      alert(`Cadastro realizado para ${name} (${email})!`);
-    }
-  };
-
-  return (
-    <SignupContainer>
-      <Header>TrocaLivros</Header>
-      <SignupForm onSubmit={handleSignup}>
-        <h2>Cadastro - TrocaLivros</h2>
-        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-        <Label htmlFor="name">Nome:</Label>
-        <Input
-          type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <Label htmlFor="email">Email:</Label>
-        <Input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Label htmlFor="password">Senha:</Label>
-        <Input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Label htmlFor="confirmPassword">Confirmar Senha:</Label>
-        <Input
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <Button type="submit">Cadastrar</Button>
-      </SignupForm>
-    </SignupContainer>
-  );
-};
-
-// --- Estilos (no final do arquivo) --- //
+// ==================== ESTILOS ====================
 const SignupContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -72,56 +13,150 @@ const SignupContainer = styled.div`
   background-color: #f0f0f0;
 `;
 
-const Header = styled.h1`
-  font-size: 2rem;
-  color: #007bff;
-  margin-bottom: 20px;
-`;
-
 const SignupForm = styled.form`
   background-color: white;
-  padding: 20px;
+  padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  box-sizing: border-box;
 `;
 
-const Label = styled.label`
-  margin-bottom: 5px;
+const FormTitle = styled.h2`
+  color: #333;
+  text-align: center;
+  margin-bottom: 1.5rem;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const FormLabel = styled.label`
   display: block;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
 `;
 
-const Input = styled.input`
+const FormInput = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
 `;
 
-const Button = styled.button`
+const SubmitButton = styled.button`
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
+  padding: 0.75rem;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 4px;
+  font-size: 1rem;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #218838;
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: red;
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
   text-align: center;
-  margin-bottom: 10px;
 `;
+
+const SuccessMessage = styled.div`
+  color: #155724;
+  background-color: #d4edda;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+`;
+
+// ==================== COMPONENTE ====================
+const SignupPage = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    
+    const result = await authService.register(name, email, password);
+    
+    if (result.success) {
+      setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
+      setTimeout(() => navigate('/login'), 2000);
+    } else {
+      setError(result.error || 'Erro ao realizar cadastro');
+    }
+  };
+
+  return (
+    <SignupContainer>
+      <SignupForm onSubmit={handleRegister}>
+        <FormTitle>Criar Conta</FormTitle>
+        
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {success && <SuccessMessage>{success}</SuccessMessage>}
+        
+        <FormGroup>
+          <FormLabel>Nome Completo:</FormLabel>
+          <FormInput
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="Digite seu nome completo"
+          />
+        </FormGroup>
+        
+        <FormGroup>
+          <FormLabel>Email:</FormLabel>
+          <FormInput
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="seu@email.com"
+          />
+        </FormGroup>
+        
+        <FormGroup>
+          <FormLabel>Senha:</FormLabel>
+          <FormInput
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Mínimo 6 caracteres"
+            minLength="6"
+          />
+        </FormGroup>
+        
+        <SubmitButton type="submit">Criar Conta</SubmitButton>
+      </SignupForm>
+    </SignupContainer>
+  );
+};
 
 export default SignupPage;

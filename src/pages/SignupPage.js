@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+// --- Componente Principal --- //
 const SignupPage = () => {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -12,7 +14,7 @@ const SignupPage = () => {
     if (password !== confirmPassword) {
       setErrorMessage('As senhas não coincidem!');
     } else {
-      alert('Cadastro realizado com sucesso!');
+      alert(`Cadastro realizado para ${name} (${email})!`);
     }
   };
 
@@ -22,12 +24,20 @@ const SignupPage = () => {
       <SignupForm onSubmit={handleSignup}>
         <h2>Cadastro - TrocaLivros</h2>
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-        <Label htmlFor="username">Usuário:</Label>
+        <Label htmlFor="name">Nome:</Label>
         <Input
           type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <Label htmlFor="email">Email:</Label>
+        <Input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <Label htmlFor="password">Senha:</Label>
@@ -52,6 +62,7 @@ const SignupPage = () => {
   );
 };
 
+// --- Estilos (no final do arquivo) --- //
 const SignupContainer = styled.div`
   display: flex;
   justify-content: center;

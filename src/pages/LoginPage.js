@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';  // Importar Link para navegação
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+// --- Componente Principal --- //
 const LoginPage = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'usuario' && password === 'senha') {
+    if (email === 'teste@email.com' && password === 'senha123') {
       alert('Login bem-sucedido!');
     } else {
-      setErrorMessage('Credenciais inválidas');
+      setErrorMessage('Email ou senha inválidos');
     }
   };
 
   return (
     <LoginContainer>
-      <Header>TrocaLivros</Header> {/* Cabeçalho com nome do app */}
+      <Header>TrocaLivros</Header>
       <LoginForm onSubmit={handleLogin}>
         <h2>Login - TrocaLivros</h2>
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-        <Label htmlFor="username">Usuário:</Label>
+        <Label htmlFor="email">Email:</Label>
         <Input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <Label htmlFor="password">Senha:</Label>
@@ -47,11 +48,12 @@ const LoginPage = () => {
   );
 };
 
+// --- Estilos (no final do arquivo) --- //
 const LoginContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column; /* Organizar o cabeçalho e o formulário em coluna */
+  flex-direction: column;
   height: 100vh;
   background-color: #f0f0f0;
 `;

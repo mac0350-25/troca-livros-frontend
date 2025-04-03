@@ -1,0 +1,22 @@
+# Dependências de pacotes
+/node_modules
+
+# Dependências do build
+/build
+/dist
+
+# Arquivos de log
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+*.bak
+
+# Arquivos de configuração locais
+/.env
+/.vscode
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db

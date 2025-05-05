@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../api/auth';
+import { handleLogin } from '../api/index';
 
 // ==================== ESTILOS ====================
 const LoginContainer = styled.div`
@@ -104,20 +105,31 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const result = await authService.login(email, password);
+    setError('');
+    console.log('Attempting login with:', { email, password }); // Debug log
     
-    if (result.success) {
-      localStorage.setItem('token', result.token);
-    } else {
-      setError(result.error);
+    try {
+      const result = await authService.login(email, password);
+      console.log('Login result:', result); // Debug log
+
+      if (result.success && result.token && result.user) {
+        console.log('Login successful, navigating...'); // Debug log
+        handleLogin(result, navigate);
+      } else {
+        console.log('Login failed:', result); // Debug log
+        setError(result.error || 'Failed to login. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An unexpected error occurred');
     }
   };
 
   return (
     <LoginContainer>
-      <LoginForm onSubmit={handleLogin}>
+      <LoginForm onSubmit={onSubmit}>
         <FormTitle>Login</FormTitle>
         
         {error && <ErrorMessage>{error}</ErrorMessage>}

@@ -18,7 +18,7 @@ export const handleLogin = (result, navigate) => {
   if (result.success) {
     localStorage.setItem('token', result.token);
     localStorage.setItem('user', JSON.stringify(result.user));
-    //console.log('Redirecting to /user with user:', result.user); // Add this
+    //console.log('Redirecting to /user with user:', result.user); // 
     navigate('/user');
   }
 };

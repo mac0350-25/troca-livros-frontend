@@ -103,23 +103,39 @@ const MyBooksPage = () => {
     // eslint-disable-next-line
   }, []);
 
-  const removeOffered = async (google_id) => {
+  const removeOffered = async (internalId) => {
     setMsg('');
     try {
-      await api.delete(`/api/books/offered/${google_id}`);
+      await api.delete(`/api/books/offered/${internalId}`);
       setMsg('Livro removido da lista de possuídos.');
-      setOffered(offered.filter(b => b.google_id !== google_id));
+      setOffered(offered.filter(item => {
+        const id =
+          item?.google_id?.id ||
+          item?.title?.id ||
+          item?.book?.id ||
+          item?.id ||
+          '';
+        return id !== internalId;
+      }));
     } catch {
       setMsg('Erro ao remover livro.');
     }
   };
 
-  const removeWanted = async (google_id) => {
+  const removeWanted = async (internalId) => {
     setMsg('');
     try {
-      await api.delete(`/api/books/wanted/${google_id}`);
+      await api.delete(`/api/books/wanted/${internalId}`);
       setMsg('Livro removido da lista de desejados.');
-      setWanted(wanted.filter(b => b.google_id !== google_id));
+      setWanted(wanted.filter(item => {
+        const id =
+          item?.google_id?.id ||
+          item?.title?.id ||
+          item?.book?.id ||
+          item?.id ||
+          '';
+        return id !== internalId;
+      }));
     } catch {
       setMsg('Erro ao remover livro.');
     }
@@ -138,12 +154,18 @@ const MyBooksPage = () => {
             <BookList>
               {offered.length === 0 && <div>Nenhum livro oferecido.</div>}
               {offered.map((item, idx) => {
-                // Try to extract book info from nested structure
                 const book =
                   item?.google_id?.book ||
                   item?.title?.book ||
                   item?.book ||
                   {};
+                // Try to get the internal id
+                const internalId =
+                  item?.google_id?.id ||
+                  item?.title?.id ||
+                  book.id ||
+                  item?.id ||
+                  '';
                 const title =
                   book.title ||
                   item?.google_id?.book?.title ||
@@ -161,15 +183,8 @@ const MyBooksPage = () => {
                     <BookTitle>{title}</BookTitle>
                     {authors && <BookAuthor>{authors}</BookAuthor>}
                     <RemoveButton
-                      onClick={() =>
-                        removeOffered(
-                          book.google_id ||
-                            item?.google_id?.book?.google_id ||
-                            item?.title?.book?.google_id ||
-                            item?.google_id ||
-                            item?.title
-                        )
-                      }
+                      onClick={() => removeOffered(internalId)}
+                      disabled={!internalId}
                     >
                       Remover
                     </RemoveButton>
@@ -188,6 +203,12 @@ const MyBooksPage = () => {
                   item?.title?.book ||
                   item?.book ||
                   {};
+                const internalId =
+                  item?.google_id?.id ||
+                  item?.title?.id ||
+                  book.id ||
+                  item?.id ||
+                  '';
                 const title =
                   book.title ||
                   item?.google_id?.book?.title ||
@@ -205,15 +226,8 @@ const MyBooksPage = () => {
                     <BookTitle>{title}</BookTitle>
                     {authors && <BookAuthor>{authors}</BookAuthor>}
                     <RemoveButton
-                      onClick={() =>
-                        removeWanted(
-                          book.google_id ||
-                            item?.google_id?.book?.google_id ||
-                            item?.title?.book?.google_id ||
-                            item?.google_id ||
-                            item?.title
-                        )
-                      }
+                      onClick={() => removeWanted(internalId)}
+                      disabled={!internalId}
                     >
                       Remover
                     </RemoveButton>

@@ -120,6 +120,7 @@ const UserPage = () => {
   const [books, setBooks] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -156,6 +157,26 @@ const UserPage = () => {
     navigate('/login');
   };
 
+  const handleAddOffered = async (google_id) => {
+    setActionMessage('');
+    try {
+      const response = await api.post('/api/books/offered', { google_id });
+      setActionMessage(response.data.message || 'Livro adicionado à lista de possuídos!');
+    } catch (error) {
+      setActionMessage(error.response?.data?.message || 'Erro ao adicionar livro à lista de possuídos.');
+    }
+  };
+
+  const handleAddWanted = async (google_id) => {
+    setActionMessage('');
+    try {
+      const response = await api.post('/api/books/wanted', { google_id });
+      setActionMessage(response.data.message || 'Livro adicionado à lista de desejados!');
+    } catch (error) {
+      setActionMessage(error.response?.data?.message || 'Erro ao adicionar livro à lista de desejados.');
+    }
+  };
+
   return (
     <Container>
       <Header>
@@ -172,6 +193,7 @@ const UserPage = () => {
       </Header>
 
       {error && <div style={{ color: 'red', padding: '1rem' }}>{error}</div>}
+      {actionMessage && <div style={{ color: 'green', padding: '1rem' }}>{actionMessage}</div>}
       
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
@@ -188,6 +210,34 @@ const UserPage = () => {
                   <BookTitle>{book.title}</BookTitle>
                   <BookAuthor>{book.authors}</BookAuthor>
                   <BookDescription>{book.description}</BookDescription>
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      style={{
+                        background: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleAddOffered(book.google_id)}
+                    >
+                      Adicionar à lista de possuídos
+                    </button>
+                    <button
+                      style={{
+                        background: '#ffc107',
+                        color: '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleAddWanted(book.google_id)}
+                    >
+                      Adicionar à lista de desejados
+                    </button>
+                  </div>
                 </BookInfo>
               </BookCard>
             ))

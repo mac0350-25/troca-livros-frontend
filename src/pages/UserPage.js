@@ -133,18 +133,14 @@ const UserPage = () => {
       const response = await api.post('/api/books/search', {
         query: searchQuery
       });
-      console.log('API Response:', response.data); // Debug log
-
       if (Array.isArray(response.data)) {
         setBooks(response.data);
       } else if (response.data.data && Array.isArray(response.data.data)) {
         setBooks(response.data.data);
       } else {
-        console.error('Unexpected API response format:', response.data);
         setError('Unexpected response format from server');
       }
     } catch (error) {
-      console.error('Search error:', error.response || error);
       setError(error.response?.data?.message || 'Error searching books. Please try again.');
     } finally {
       setLoading(false);
@@ -189,7 +185,35 @@ const UserPage = () => {
           />
           <SearchButton onClick={handleSearch}>Search</SearchButton>
         </SearchContainer>
-        <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+        <div>
+          <button
+            style={{
+              marginRight: '1rem',
+              background: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer'
+            }}
+            onClick={() => navigate('/mybooks')}
+          >
+            Meus Livros
+          </button>
+          <button
+            style={{
+              background: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer'
+            }}
+            onClick={handleLogout}
+          >
+            Sair
+          </button>
+        </div>
       </Header>
 
       {error && <div style={{ color: 'red', padding: '1rem' }}>{error}</div>}

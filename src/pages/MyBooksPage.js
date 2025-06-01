@@ -58,19 +58,15 @@ const MyBooksPage = () => {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
 
-  // Helper to fetch book info by ID
   const fetchBookInfo = async (id) => {
     try {
       const res = await api.post('/api/books/search', { query: id });
-      // If search returns an array, get the first match
       if (Array.isArray(res.data) && res.data.length > 0) {
         return { ...res.data[0], google_id: id };
       }
-      // If search returns an object with data array
       if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
         return { ...res.data.data[0], google_id: id };
       }
-      // Fallback: just return the id as title
       return { google_id: id, title: id };
     } catch {
       return { google_id: id, title: id };
@@ -82,11 +78,9 @@ const MyBooksPage = () => {
     try {
       const res = await api.get('/api/books');
       const data = res.data?.data || {};
-      // Fetch details for offered books
       const offeredDetails = await Promise.all(
         (data.offered_books || []).map(fetchBookInfo)
       );
-      // Fetch details for wanted books
       const wantedDetails = await Promise.all(
         (data.wanted_books || []).map(fetchBookInfo)
       );
@@ -100,7 +94,6 @@ const MyBooksPage = () => {
 
   useEffect(() => {
     fetchBooks();
-    // eslint-disable-next-line
   }, []);
 
   const removeOffered = async (internalId) => {
@@ -159,7 +152,6 @@ const MyBooksPage = () => {
                   item?.title?.book ||
                   item?.book ||
                   {};
-                // Try to get the internal id
                 const internalId =
                   item?.google_id?.id ||
                   item?.title?.id ||

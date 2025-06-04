@@ -24,7 +24,7 @@ export const authService = {
       console.error('Login error:', error.response?.data || error);
       return {
         success: false,
-        error: error.response?.data?.message || 'Credenciais inválidas'
+        error: error.response?.data?.error?.message || 'Credenciais inválidas'
       };
     }
   },
@@ -42,7 +42,7 @@ export const authService = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Erro no cadastro'
+        error: error.response?.data?.error?.message || 'Erro no cadastro'
       };
     }
   }

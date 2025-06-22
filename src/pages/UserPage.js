@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState  } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/index';
@@ -54,19 +54,6 @@ const SearchButton = styled.button`
   }
 `;
 
-const LogoutButton = styled.button`
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s;
-  &:hover {
-    background: #b52a37;
-  }
-`;
 
 const BooksContainer = styled.div`
   display: grid;
@@ -92,6 +79,9 @@ const BookImage = styled.img`
 
 const BookInfo = styled.div`
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Ocupa o espaço restante */
 `;
 
 const BookTitle = styled.h3`
@@ -105,13 +95,57 @@ const BookAuthor = styled.p`
 `;
 
 const BookDescription = styled.p`
-  margin: 0;
+  margin: 0 0 1rem 0;
   color: #777;
   font-size: 0.9rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1; /* Permite que a descrição ocupe o espaço disponível */
+`;
+
+const Toast = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: ${props => props.type === 'success' ? '#28a745' : '#dc3545'};
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transform: translateX(${props => props.show ? '0' : '400px'});
+  transition: transform 0.3s ease-in-out;
+  max-width: 400px;
+  word-wrap: break-word;
+`;
+
+const LoadingOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `;
 
 const UserPage = () => {
@@ -119,8 +153,16 @@ const UserPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
-  const [actionMessage, setActionMessage] = useState('');
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: '' });
+    }, 4000);
+  };
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -141,7 +183,7 @@ const UserPage = () => {
         setError('Unexpected response format from server');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error searching books. Please try again.');
+      setError(error.response?.data?.error?.message || 'Error searching books. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -154,36 +196,52 @@ const UserPage = () => {
   };
 
   const handleAddOffered = async (google_id) => {
-    setActionMessage('');
+    setActionLoading(true);
     try {
       const response = await api.post('/api/books/offered', { google_id });
-      setActionMessage(response.data.message || 'Livro adicionado à lista de possuídos!');
+      showToast(response.data.message || 'Livro adicionado à lista de possuídos!', 'success');
     } catch (error) {
-      setActionMessage(error.response?.data?.message || 'Erro ao adicionar livro à lista de possuídos.');
+      showToast(error.response?.data?.error?.message || 'Erro ao adicionar livro à lista de possuídos.', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleAddWanted = async (google_id) => {
-    setActionMessage('');
+    setActionLoading(true);
     try {
       const response = await api.post('/api/books/wanted', { google_id });
-      setActionMessage(response.data.message || 'Livro adicionado à lista de desejados!');
+      showToast(response.data.message || 'Livro adicionado à lista de desejados!', 'success');
     } catch (error) {
-      setActionMessage(error.response?.data?.message || 'Erro ao adicionar livro à lista de desejados.');
+      showToast(error.response?.data?.error?.message || 'Erro ao adicionar livro à lista de desejados.', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   return (
     <Container>
+      {actionLoading && (
+        <LoadingOverlay>
+          <LoadingSpinner />
+        </LoadingOverlay>
+      )}
+      
+      <Toast show={toast.show} type={toast.type}>
+        {toast.message}
+      </Toast>
+
       <Header>
         <SearchContainer>
-          <SearchInput
-            type="text"
-            placeholder="Search for books..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <SearchButton onClick={handleSearch}>Search</SearchButton>
+          <form onSubmit={handleSearch} style={{ display: 'flex', width: '100%' }}>
+            <SearchInput
+              type="text"
+              placeholder="Search for books..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <SearchButton type="submit">Search</SearchButton>
+          </form>
         </SearchContainer>
         <div>
           <button
@@ -207,7 +265,8 @@ const UserPage = () => {
               border: 'none',
               borderRadius: '4px',
               padding: '0.5rem 1rem',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              marginRight: '2rem'
             }}
             onClick={handleLogout}
           >
@@ -217,7 +276,6 @@ const UserPage = () => {
       </Header>
 
       {error && <div style={{ color: 'red', padding: '1rem' }}>{error}</div>}
-      {actionMessage && <div style={{ color: 'green', padding: '1rem' }}>{actionMessage}</div>}
       
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
@@ -234,6 +292,7 @@ const UserPage = () => {
                   <BookTitle>{book.title}</BookTitle>
                   <BookAuthor>{book.authors}</BookAuthor>
                   <BookDescription>{book.description}</BookDescription>
+
                   <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
                     <button
                       style={{
@@ -242,9 +301,13 @@ const UserPage = () => {
                         border: 'none',
                         borderRadius: '4px',
                         padding: '0.5rem 1rem',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        opacity: actionLoading ? 0.6 : 1,
+                        pointerEvents: actionLoading ? 'none' : 'auto'
                       }}
                       onClick={() => handleAddOffered(book.google_id)}
+                      disabled={actionLoading}
                     >
                       Adicionar à lista de possuídos
                     </button>
@@ -255,9 +318,13 @@ const UserPage = () => {
                         border: 'none',
                         borderRadius: '4px',
                         padding: '0.5rem 1rem',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        opacity: actionLoading ? 0.6 : 1,
+                        pointerEvents: actionLoading ? 'none' : 'auto'
                       }}
                       onClick={() => handleAddWanted(book.google_id)}
+                      disabled={actionLoading}
                     >
                       Adicionar à lista de desejados
                     </button>

@@ -260,6 +260,20 @@ const UserPage = () => {
           </button>
           <button
             style={{
+              marginRight: '1rem',
+              background: '#28a745', // verde
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer'
+            }}
+            onClick={() => navigate('/trades')}
+          >
+            Trocas de Livros
+          </button>
+          <button
+            style={{
               background: '#dc3545',
               color: 'white',
               border: 'none',

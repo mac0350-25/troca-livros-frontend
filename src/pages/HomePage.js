@@ -50,7 +50,6 @@ const HomePage = () => {
       <Header>
         <NavButton to="/login">Login</NavButton>
         <NavButton to="/signup">Cadastro</NavButton>
-        <NavButton to="/trades">Trocas de Livros</NavButton>
       </Header>
       <WelcomeMessage>Bem-vindo ao Troca Livros!</WelcomeMessage>
     </HomeContainer>
